@@ -1,0 +1,49 @@
+# Starter pipeline
+
+trigger:
+  - main
+
+pool:
+  name: Default
+
+stages:
+  - stage: CI
+    displayName: "CI - Build"
+    jobs:
+      - job: Build
+        steps:
+          - script: echo "CI running - code pulled from github"
+
+  - stage: DEV
+    dependsOn: CI
+    jobs:
+      - deployment: DeployDev
+        environment: dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureFunctionApp@1
+                  inputs:
+                    azureSubscription: 'attchedFunc'
+                    appType: functionApp
+                    appName: 'check-custom'
+                    slotName: 'dev'
+                    package: '$(System.DefaultWorkingDirectory)'
+
+  - stage: PROD
+    dependsOn: DEV
+    jobs:
+      - deployment: DeployProd
+        environment: prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureFunctionApp@1
+                  inputs:
+                    azureSubscription: 'attchedFunc'
+                    appType: functionApp
+                    appName: 'check-custom'
+                    slotName: 'production'
+                    package: '$(System.DefaultWorkingDirectory)'
