@@ -1,2 +1,4 @@
 resource "azurerm_resource_group" "resg" {
-   name
+   name = "rg-revcre21-desk"
+   location = "West Europe"
+  }
